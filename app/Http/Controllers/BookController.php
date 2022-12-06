@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Author;
 use App\Models\Book;
 use Illuminate\Http\Request;
 
@@ -14,8 +15,9 @@ class BookController extends Controller
      */
     public function index()
     {
+        $authors = Author::all();
         $books = Book::all();
-        return view('books.index',compact('books'));
+        return view('books.index',compact('books','authors'));
     }
 
     /**
@@ -25,7 +27,8 @@ class BookController extends Controller
      */
     public function create()
     {
-        //
+        $authors = Author::all();
+        return view('books.create',compact('authors'));
     }
 
     /**
@@ -36,7 +39,19 @@ class BookController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = [
+            'id' => 'required|min:5|max:5',
+            'title' => 'required|max:255',
+            'page' => 'required|integer|min:1|max:99999',
+            'category' => 'required|max:255',
+            'publisher' => 'required|max:255',
+            'author_id' => 'required|not_in:none'
+        ];
+        $validated = $request->validate($rules);
+        Book::create($validated);
+        $request->session()->flash('success',"Successfully added {$validated['title']}!");
+        return redirect(route('books.index'));
+        // dump($validated);
     }
 
     /**
@@ -47,7 +62,7 @@ class BookController extends Controller
      */
     public function show(Book $book)
     {
-        //
+        return view('books.show', compact('book'));
     }
 
     /**
@@ -58,7 +73,8 @@ class BookController extends Controller
      */
     public function edit(Book $book)
     {
-        //
+        $authors = Author::all();
+        return view("books.edit",compact("book",'authors'));
     }
 
     /**
@@ -70,7 +86,18 @@ class BookController extends Controller
      */
     public function update(Request $request, Book $book)
     {
-        //
+        $rules = [
+            'id' => 'required|min:5|max:5',
+            'title' => 'required|max:255',
+            'page' => 'required|integer|min:1|max:99999',
+            'category' => 'required|max:255',
+            'publisher' => 'required|max:255',
+            'author_id' => 'required|not_in:none'
+        ];
+        $validated = $request->validate($rules);
+        $book->update($validated);
+        $request->session()->flash('success',"Successfully updated {$validated['title']}!");
+        return redirect(route('books.index'));
     }
 
     /**
@@ -81,6 +108,7 @@ class BookController extends Controller
      */
     public function destroy(Book $book)
     {
-        //
+        $book->delete();
+        return redirect(route('books.index'))->with('success', "Successfully deleted {$book['title']}!");
     }
 }

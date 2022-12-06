@@ -14,7 +14,8 @@ class AuthorController extends Controller
      */
     public function index()
     {
-        //
+        $authors = Author::all();
+        return view('authors.index',compact('authors'));
     }
 
     /**
@@ -24,7 +25,7 @@ class AuthorController extends Controller
      */
     public function create()
     {
-        //
+        return view('Authors.create');
     }
 
     /**
@@ -35,7 +36,15 @@ class AuthorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = [
+            'name' => 'required|max:255',
+            'date_of_birth' => 'required|date',
+            'email' => 'required|max:255'
+        ];
+        $validated = $request->validate($rules);
+        Author::create($validated);
+        $request->session()->flash('success',"Successfully added {$validated['name']}!");
+        return redirect(route('authors.index'));
     }
 
     /**
@@ -46,7 +55,7 @@ class AuthorController extends Controller
      */
     public function show(Author $author)
     {
-        //
+        return view('authors.show', compact('author'));
     }
 
     /**
@@ -57,7 +66,7 @@ class AuthorController extends Controller
      */
     public function edit(Author $author)
     {
-        //
+        return view("authors.edit",compact("author"));
     }
 
     /**
@@ -69,7 +78,15 @@ class AuthorController extends Controller
      */
     public function update(Request $request, Author $author)
     {
-        //
+        $rules = [
+            'name' => 'required|max:255',
+            'date_of_birth' => 'required|date',
+            'email' => 'required|max:255'
+        ];
+        $validated = $request->validate($rules);
+        $author->update($validated);
+        $request->session()->flash('success',"Successfully updated {$validated['name']}!");
+        return redirect(route('authors.index'));
     }
 
     /**
@@ -80,6 +97,7 @@ class AuthorController extends Controller
      */
     public function destroy(Author $author)
     {
-        //
+        $author->delete();
+        return redirect(route('authors.index'))->with('success', "Successfully deleted {$author['title']}!");
     }
 }
